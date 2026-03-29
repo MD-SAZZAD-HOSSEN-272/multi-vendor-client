@@ -19,6 +19,7 @@ export default function Navbar() {
       <div className="hidden md:flex gap-6">
         <Link href="/">Home</Link>
         <Link href="/movies">Movies</Link>
+        <Link href="/dashboard">Dashboard</Link>
 
         {
             user?.role === 'vendor' ? (
