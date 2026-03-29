@@ -1,53 +1,92 @@
-// "use client";
+"use client";
 
-// import { createContext, useEffect, useState } from "react";
-// import secureAxios from "@/lib/secureAxios";
+import { createContext, useEffect, useState } from "react";
+import useSecureAxios from "../hooks/useSecureAxios";
 
-// export const AuthContext = createContext(null);
+export const AuthContext = createContext();
 
-// export default function AuthProvider({ children }) {
-//     const [user, setUser] = useState(null);
-//     const [loading, setLoading] = useState(true);
+export default function AuthProvider({ children }) {
+    const axiosSecure = useSecureAxios();
 
-//     const fetchCurrentUser = async () => {
-//         const token = localStorage.getItem("token");
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-//         if (!token) {
-//             setLoading(false);
-//             return;
-//         }
+    // ✅ Register
+    const registerUser = async (data) => {
+        try {
+            const res = await axiosSecure.post("/api/auth/register", data);
+            return res.data;
+        } catch (err) {
+            return { success: false, message: "Server error" };
+        }
+    };
 
-//         try {
-//             const res = await secureAxios.get("/api/auth/me");
-//             setUser(res.data.data);
-//         } catch (error) {
-//             localStorage.removeItem("token");
-//             setUser(null);
-//         } finally {
-//             setLoading(false);
-//         }
-//     };
+    // ✅ Login
+    const loginUser = async (data) => {
+        try {
+            const res = await axiosSecure.post("/api/auth/login", data);
 
-//     useEffect(() => {
-//         fetchCurrentUser();
-//     }, []);
+            if (res.data?.data?.token) {
+                const token = res.data.data.token;
 
-//     const logout = () => {
-//         localStorage.removeItem("token");
-//         setUser(null);
-//     };
+                localStorage.setItem("token", token);
 
-//     return (
-//         <AuthContext.Provider
-//             value={{
-//                 user,
-//                 loading,
-//                 setUser,
-//                 fetchCurrentUser,
-//                 logout,
-//             }}
-//         >
-//             {children}
-//         </AuthContext.Provider>
-//     );
-// }
+                // 🔥 instant UI update
+                setUser({
+                    id: res.data.data.id,
+                    email: res.data.data.email,
+                    role: res.data.data.role,
+                });
+
+                // 🔥 important: re-fetch user AFTER token set
+                setTimeout(() => {
+                    getMe();
+                }, 0);
+            }
+
+            return res.data;
+        } catch (err) {
+            return { success: false, message: "Server error" };
+        }
+    };
+
+    // ✅ Get current user
+    const getMe = async () => {
+        try {
+            const res = await axiosSecure.get("/api/auth/me");
+
+            if (res.data?.success) {
+                setUser(res.data.data);
+            }
+        } catch (err) {
+            setUser(null);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // ✅ Logout
+    const logout = () => {
+        localStorage.removeItem("token");
+        setUser(null);
+    };
+
+    // ✅ Auto check user on load
+    useEffect(() => {
+        getMe();
+    }, []);
+
+    return (
+        <AuthContext.Provider
+            value={{
+                user,
+                loading,
+                registerUser,
+                loginUser,
+                logout,
+            }}
+        >
+            {children}
+        </AuthContext.Provider>
+    );
+}

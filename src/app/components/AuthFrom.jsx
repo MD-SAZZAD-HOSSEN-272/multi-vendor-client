@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { useAuth } from "../hooks/useAuth";
 import { useRouter } from "next/navigation";
+import useAuthContext from "../hooks/useAuthContext";
 
 
 export default function AuthForm({ type }) {
   const isLogin = type === "login";
-  const { registerUser, loginUser } = useAuth();
+  const { registerUser, loginUser } = useAuthContext();
   const route = useRouter();
 
 
@@ -43,6 +43,8 @@ export default function AuthForm({ type }) {
           email: form.email,
           password: form.password,
         });
+
+        console.log(res);
 
         if (res.success) {
           route.push("/");
