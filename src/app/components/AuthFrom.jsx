@@ -121,7 +121,7 @@ export default function AuthForm({ type }) {
           />
 
           {/* Role (only register) */}
-          {!isLogin && (
+          {/* {!isLogin && (
             <select
               name="role"
               value={form.role}
@@ -131,7 +131,7 @@ export default function AuthForm({ type }) {
               <option value="user">User</option>
               <option value="vendor">Vendor</option>
             </select>
-          )}
+          )} */}
 
           {/* Error */}
           {error && (
