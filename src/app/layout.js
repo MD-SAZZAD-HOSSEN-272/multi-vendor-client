@@ -1,9 +1,10 @@
+
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "./components/navbar";
 import Footer from "./components/Footer";
 import AuthProvider from "./provider/authProvider";
-
+import { LayoutWrapper } from "./wrapper/layoutWrapper";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -28,13 +29,12 @@ export default function RootLayout({ children }) {
       <body className="min-h-full">
 
         <AuthProvider>
-          <Navbar />
+
+          <LayoutWrapper>
+            {children}
+          </LayoutWrapper>
 
 
-
-          {children}
-
-          <Footer />
 
         </AuthProvider>
 
