@@ -6,15 +6,7 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col">
       
-      {/* Header */}
-      <header className="bg-gray-800 p-6 flex justify-between items-center shadow-md">
-        <h1 className="text-2xl font-bold text-red-500">Dashboard</h1>
-        <nav className="space-x-4">
-          <Link href="/" className="hover:text-red-400">Home</Link>
-          <Link href="/dashboard" className="hover:text-red-400">Dashboard</Link>
-          <Link href="/profile" className="hover:text-red-400">Profile</Link>
-        </nav>
-      </header>
+      
 
       {/* Main Content */}
       <main className="flex-1 p-6">
