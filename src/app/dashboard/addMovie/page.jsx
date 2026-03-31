@@ -1,5 +1,7 @@
 "use client";
 
+import useSecureAxios from "@/app/hooks/useSecureAxios";
+import uploadToImgBB from "@/app/lib/UploadToImgBB";
 import { useState } from "react";
 
 export default function ApplyPage() {
@@ -13,6 +15,7 @@ export default function ApplyPage() {
   });
 
   const [preview, setPreview] = useState([]);
+  const axiosSecure = useSecureAxios();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -42,11 +45,21 @@ export default function ApplyPage() {
     setPreview(previewUrls);
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();;
 
-    console.log("🔥 FORM DATA:", form);
-    console.log("🔥 FILES:", form.files);
+    // ✅ UPLOAD FILES TO IMGBB
+    const uploadedUrls = await uploadToImgBB(form.files);
+
+    const { files, ...rest } = form;
+
+
+   const res = await axiosSecure.post("api/vendor/movies", {
+     ...rest,
+     images: uploadedUrls,
+   });
+
+   console.log(res.data);
 
     alert("Check console for submitted data");
   };
