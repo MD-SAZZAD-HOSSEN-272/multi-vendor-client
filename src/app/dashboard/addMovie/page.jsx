@@ -1,16 +1,16 @@
 "use client";
-
 import useSecureAxios from "@/app/hooks/useSecureAxios";
 import uploadToImgBB from "@/app/lib/UploadToImgBB";
 import { useState } from "react";
 
-export default function ApplyPage() {
+export default function AddMoviePage() {
   const [form, setForm] = useState({
-    name: "",
-    location: "",
-    email: "",
-    phone: "",
+    title: "",
     description: "",
+    genre: "",
+    price: "",
+    rentalPrice: "",
+    releaseDate: "",
     files: [],
   });
 
@@ -22,22 +22,20 @@ export default function ApplyPage() {
     setForm({ ...form, [name]: value });
   };
 
-  // ✅ HANDLE MULTIPLE IMAGE
+  // ✅ MULTIPLE IMAGE
   const handleFileChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
 
-    // ✅ allow only images
     const imageFiles = selectedFiles.filter((file) =>
       file.type.startsWith("image/")
     );
 
     if (imageFiles.length !== selectedFiles.length) {
-      alert("Only image files are allowed!");
+      alert("Only images allowed!");
     }
 
     setForm({ ...form, files: imageFiles });
 
-    // ✅ preview generate
     const previewUrls = imageFiles.map((file) =>
       URL.createObjectURL(file)
     );
@@ -46,28 +44,36 @@ export default function ApplyPage() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();;
+    e.preventDefault();
 
-    // ✅ UPLOAD FILES TO IMGBB
-    const uploadedUrls = await uploadToImgBB(form.files);
+    try {
+      // 🔥 upload images
+      const uploadedUrls = await uploadToImgBB(form.files);
 
-    const { files, ...rest } = form;
+      const { files, ...rest } = form;
 
+      const finalData = {
+        ...rest,
+        price: Number(form.price),
+        rentalPrice: Number(form.rentalPrice),
+        thumbnail: uploadedUrls[0] || "",
+        images: uploadedUrls,
+      };
 
-   const res = await axiosSecure.post("api/vendor/movies", {
-     ...rest,
-     images: uploadedUrls,
-   });
+      const res = await axiosSecure.post("/api/vendor/movies", finalData);
 
-   console.log(res.data);
+      console.log("✅ MOVIE CREATED:", res.data);
 
-    alert("Check console for submitted data");
+      alert("Movie added successfully!");
+    } catch (err) {
+      console.log(err);
+      alert("Something went wrong");
+    }
   };
 
   return (
     <div className="min-h-screen bg-black text-white relative overflow-hidden">
 
-      {/* BACKGROUND */}
       <div className="absolute inset-0 bg-[url('/cinema-bg.jpg')] bg-cover bg-center opacity-20"></div>
 
       <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between px-6 lg:px-16 py-16 gap-10">
@@ -75,16 +81,16 @@ export default function ApplyPage() {
         {/* LEFT */}
         <div className="max-w-xl">
           <p className="text-red-500 text-sm tracking-widest mb-3">
-            PARTNER WITH US
+            ADD NEW MOVIE
           </p>
 
           <h1 className="text-5xl font-bold leading-tight mb-6">
-            Showcase <br />
-            Your <span className="text-red-500">Cinema.</span>
+            Upload <br />
+            Your <span className="text-red-500">Movie</span>
           </h1>
 
           <p className="text-gray-400 mb-8">
-            Join the world's premier cinematic network.
+            Add your movie to the platform and reach thousands of users.
           </p>
         </div>
 
@@ -93,22 +99,49 @@ export default function ApplyPage() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
 
-            {/* INPUTS */}
+            {/* TITLE + GENRE */}
             <div className="grid grid-cols-2 gap-4">
-              <input name="name" onChange={handleChange} placeholder="Cinema Name"
-                className="bg-[#1a1a1a] p-3 rounded-lg border border-gray-700" />
-              <input name="location" onChange={handleChange} placeholder="Location"
-                className="bg-[#1a1a1a] p-3 rounded-lg border border-gray-700" />
+              <input
+                name="title"
+                onChange={handleChange}
+                placeholder="Movie Title"
+                className="bg-[#1a1a1a] p-3 rounded-lg border border-gray-700"
+              />
+              <input
+                name="genre"
+                onChange={handleChange}
+                placeholder="Genre"
+                className="bg-[#1a1a1a] p-3 rounded-lg border border-gray-700"
+              />
             </div>
 
+            {/* PRICE */}
             <div className="grid grid-cols-2 gap-4">
-              <input name="email" onChange={handleChange} placeholder="Email"
-                className="bg-[#1a1a1a] p-3 rounded-lg border border-gray-700" />
-              <input name="phone" onChange={handleChange} placeholder="Phone"
-                className="bg-[#1a1a1a] p-3 rounded-lg border border-gray-700" />
+              <input
+                name="price"
+                type="number"
+                onChange={handleChange}
+                placeholder="Price"
+                className="bg-[#1a1a1a] p-3 rounded-lg border border-gray-700"
+              />
+              <input
+                name="rentalPrice"
+                type="number"
+                onChange={handleChange}
+                placeholder="Rental Price"
+                className="bg-[#1a1a1a] p-3 rounded-lg border border-gray-700"
+              />
             </div>
 
-            {/* ✅ FILE UPLOAD */}
+            {/* DATE */}
+            <input
+              name="releaseDate"
+              type="date"
+              onChange={handleChange}
+              className="w-full bg-[#1a1a1a] p-3 rounded-lg border border-gray-700"
+            />
+
+            {/* FILE UPLOAD */}
             <div className="border border-dashed border-gray-600 rounded-lg p-6 text-center text-gray-400">
               <input
                 type="file"
@@ -119,16 +152,16 @@ export default function ApplyPage() {
                 id="upload"
               />
               <label htmlFor="upload" className="cursor-pointer">
-                📁 Upload Images (Multiple)
+                📁 Upload Movie Images
               </label>
             </div>
 
-            {/* ✅ IMAGE PREVIEW */}
+            {/* PREVIEW */}
             {preview.length > 0 && (
               <div className="grid grid-cols-3 gap-3">
-                {preview.map((src, index) => (
+                {preview.map((src, i) => (
                   <img
-                    key={index}
+                    key={i}
                     src={src}
                     className="w-full h-24 object-cover rounded-lg border border-gray-700"
                   />
@@ -136,15 +169,16 @@ export default function ApplyPage() {
               </div>
             )}
 
+            {/* DESCRIPTION */}
             <textarea
               name="description"
               onChange={handleChange}
-              placeholder="Description"
+              placeholder="Movie Description"
               className="w-full bg-[#1a1a1a] p-3 rounded-lg border border-gray-700"
             />
 
             <button className="w-full bg-red-600 hover:bg-red-700 p-3 rounded-lg font-semibold">
-              Submit →
+              Add Movie →
             </button>
           </form>
         </div>

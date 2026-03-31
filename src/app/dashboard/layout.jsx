@@ -1,14 +1,12 @@
 "use client";
+
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
+import useAuthContext from "../hooks/useAuthContext";
 
 export default function DashboardLayout({ children }) {
   const router = useRouter();
-
-  const user = {
-    role: "vendor", // 🔥 এটা তুমি auth context / JWT থেকে আনবে
-  };
+  const { user, logout } = useAuthContext();
 
   useEffect(() => {
     if (!user) {
@@ -16,45 +14,95 @@ export default function DashboardLayout({ children }) {
     }
   }, [user, router]);
 
-  return (
-    <div>
+  // 🔥 default image fallback
+  const userImage =
+    user?.image || "https://i.ibb.co/2kRz9qP/user.png";
 
-      {/* Header */}
-      <header className="bg-gray-800 p-6 flex justify-between items-center shadow-md">
-        <h1 className="text-2xl font-bold text-red-500">Dashboard</h1>
-        <nav className="space-x-4">
-          <Link href="/" className="hover:text-red-400">Home</Link>
-          <Link href="/dashboard" className="hover:text-red-400">Dashboard</Link>
-          <Link href="/profile" className="hover:text-red-400">Profile</Link>
-        </nav>
+  return (
+    <div className="bg-black text-white min-h-screen">
+
+      {/* 🔥 TOP HEADER */}
+      <header className="bg-[#0f0f0f] border-b border-gray-800 px-6 py-4 flex justify-between items-center">
+
+        <h1 className="text-2xl font-bold text-red-500">
+          🎬 Movie Dashboard
+        </h1>
+
+        {/* 🔥 USER INFO */}
+        <div className="flex items-center gap-4">
+
+          <div className="flex items-center gap-3">
+            <img
+              src={userImage}
+              alt="user"
+              className="w-10 h-10 rounded-full border border-gray-700 object-cover"
+            />
+
+            <div className="text-sm">
+              <p className="font-semibold">
+                {user?.name || "User"}
+              </p>
+              <p className="text-gray-400 text-xs capitalize">
+                {user?.role || "guest"}
+              </p>
+            </div>
+          </div>
+
+          {/* 🔥 LOGOUT BUTTON */}
+          <button
+            onClick={() => {
+              logout();
+              router.push("/login");
+            }}
+            className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-sm font-semibold transition"
+          >
+            Logout
+          </button>
+        </div>
       </header>
 
+      <div className="flex">
 
-      <div className="flex min-h-screen bg-black text-white">
+        {/* 🔥 SIDEBAR */}
+        <aside className="w-64 bg-[#141414] min-h-screen border-r border-gray-800 p-4">
 
-        {/* Sidebar */}
-        <div className="w-64 bg-[#141414] p-4">
+          <ul className="space-y-2">
 
-          <ul className="space-y-3">
-            <li onClick={() => router.push("/dashboard/user")}>
-              User Panel
+            <li
+              onClick={() => router.push("/dashboard/user")}
+              className="p-3 rounded-lg hover:bg-gray-800 cursor-pointer transition"
+            >
+              👤 User Panel
             </li>
-            <li onClick={() => router.push("/dashboard/addMovie")}>
-              Add Movie
+
+            <li
+              onClick={() => router.push("/dashboard/addMovie")}
+              className="p-3 rounded-lg hover:bg-gray-800 cursor-pointer transition"
+            >
+              🎬 Add Movie
             </li>
-            <li onClick={() => router.push("/dashboard/vendor")}>
-              Vendor Panel
+
+            <li
+              onClick={() => router.push("/dashboard/vendor")}
+              className="p-3 rounded-lg hover:bg-gray-800 cursor-pointer transition"
+            >
+              🏢 Vendor Panel
             </li>
-            <li onClick={() => router.push("/dashboard/admin")}>
-              Admin Panel
+
+            <li
+              onClick={() => router.push("/dashboard/admin")}
+              className="p-3 rounded-lg hover:bg-gray-800 cursor-pointer transition"
+            >
+              ⚙️ Admin Panel
             </li>
           </ul>
-        </div>
+        </aside>
 
-        {/* Content */}
-        <div className="flex-1 p-6">{children}</div>
+        {/* 🔥 MAIN CONTENT */}
+        <main className="flex-1 p-6 bg-[#0b0b0b]">
+          {children}
+        </main>
       </div>
-
     </div>
   );
 }
